@@ -1,0 +1,41 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Index
+{% endblock %}
+
+{% block main %}
+<table class="table table-striped">
+        <thead>
+            <tr style="text-align:left">
+                <th>Symbol</th>
+                <th>Name</th>
+                <th>Shares</th>
+                <th>Price</th>
+                <th>TOTAL</th>
+            </tr>
+        </thead>
+        <tfoot>
+            <tr style="text-align:left">
+                <td colspan="4"></td>
+                <td>{{ hold_value | usd }}</td>
+            </tr>
+        </tfoot>
+        <tbody style="text-align:left">
+            {% for port in ports %}
+                <tr>
+                    <td>{{ port.symbol }}</td>
+                    <td>{{ port.name }}</td>
+                    <td>{{ port.sharetotal }}</td>
+                    <td>{{ port.stock_price | usd }}</td>
+                    <td>{{ port.total | usd }}</td>
+                </tr>
+            {% endfor %}
+
+            <tr>
+                <td colspan="4" style="text-align:left">CASH</td>
+                <td>{{ remaining_cash | usd }}</td>
+            </tr>
+        </tbody>
+    </table>
+{% endblock %}

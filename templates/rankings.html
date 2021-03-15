@@ -1,0 +1,62 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Rankings
+{% endblock %}
+
+{% block main %}
+    <form action="/rankings" method="post">
+        <div class="form-group">
+        <select class="form-control" name="rankings">
+            <option disabled selected value=" ">View By</option>
+            <option value=holdvalue>Hold value</option>
+            <option value=change>Percent Change</option>
+            <option value=transactions>Number of transactions</option>
+        </select>
+        </div>
+        <div class="form-group">
+        <select class="form-control" name="time">
+            <option disabled selected value=" ">Time</option>
+            <option value=day>Day</option>
+            <option value=week>Week</option>
+            <option value=month>Month</option>
+            <option value=year>Year</option>
+        </select>
+        </div>
+
+        <button class="btn btn-primary" type="submit">Submit</button>
+    </form>
+
+
+
+<table class="table table-striped">
+        <thead>
+            <tr style="text-align:left">
+                <th>Username</th>
+                <th>Hold value</th>
+                <th>Transactions</th>
+                <th>Percent change</th>
+            </tr>
+        </thead>
+        <tfoot>
+            <tr style="text-align:left">
+                <td colspan="4"></td>
+                <td>{{ hold_value }}</td>
+            </tr>
+        </tfoot>
+        <tbody style="text-align:left">
+            {% for user in users %}
+                <tr>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.hold_value }}</td>
+                    <td>{{ user.transactions}}</td>
+                </tr>
+            {% endfor %}
+
+            <tr>
+                <td colspan="4" style="text-align:left">CASH</td>
+                <td>{{ remaining_cash }}</td>
+            </tr>
+        </tbody>
+    </table>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Quoted
+{% endblock %}
+
+{% block main %}
+<p style="color:red"> The stock doesn't exist. Please try again. </p>
+ <form action="/quote" method="post">
+        <div class="form-group">
+            <input class="form-control" name="symbol" placeholder="Symbol" type="search">
+        </div>
+        <button class="btn btn-primary" type="submit">Quote</button>
+    </form>
+
+{% endblock %}
