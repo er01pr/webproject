@@ -409,10 +409,10 @@ def rankings():
         users = db.execute ("SELECT *, history.id, COUNT(transacted) AS transactions, users.username, users.hold_value FROM history INNER JOIN users ON history.id = users.id GROUP BY history.id ORDER BY COUNT(transacted) DESC")
 
         #Percent change
-        ports = db.execuute("SELECT portfolio.id, SUM(percent_change) AS sum_percent FROM portfolio GROUP BY id ORDER BY SUM(percent_change) ASC")
+        #ports = db.execuute("SELECT portfolio.id, SUM(percent_change) AS sum_percent FROM portfolio GROUP BY id ORDER BY SUM(percent_change) ASC")
 
 
-        return render_template("rankings.html", users=users, ports=ports)
+        return render_template("rankings.html", users=users)
 
 
 def errorhandler(e):
