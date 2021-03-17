@@ -400,16 +400,29 @@ def rankings():
         month = request.form.get("month")
         year = request.form.get("year")
 
-        #Compute the percent Change
+        
+        #Query for the symbol in the database.
+        rows = db.execute("SELECT symbol FROM portfolio")
 
-        #Query all stocks of a user and add all of the percent change.
-        #user_percentchange = db.execute("SELECT ")
+        for i in range(len(rows)):
+            print(rows[i]['symbol'])
+
+
+        #Lookup the stock symbol data (price, symbol, company name, percent_change)
+        #stock = lookup(symbol)
+        #price_today = stock['price']
+
+        #Update the price_today field in the porfolio table with the current price of the stock.
+        #test = db.execute("UPDATE portfolio SET price_today = :price_today", price_today=price_today)
 
         #Compute the Hold Value
         users = db.execute ("SELECT *, history.id, COUNT(transacted) AS transactions, users.username, users.hold_value FROM history INNER JOIN users ON history.id = users.id GROUP BY history.id ORDER BY COUNT(transacted) DESC")
 
         #Percent change
         #ports = db.execuute("SELECT portfolio.id, SUM(percent_change) AS sum_percent FROM portfolio GROUP BY id ORDER BY SUM(percent_change) ASC")
+
+        #Get the current price of the stocks in the portfolio.
+
 
 
         return render_template("rankings.html", users=users)
