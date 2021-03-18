@@ -400,12 +400,16 @@ def rankings():
         month = request.form.get("month")
         year = request.form.get("year")
 
-        
+
         #Query for the symbol in the database.
-        rows = db.execute("SELECT symbol FROM portfolio")
+        rows = db.execute("SELECT DISTINCT symbol FROM portfolio")
 
         for i in range(len(rows)):
             print(rows[i]['symbol'])
+            symbol = rows[i]['symbol']
+            stock = lookup(rows[i]['symbol'])
+            price_today = stock['price']
+            db.execute("UPDATE portfolio SET price_today = :price_today WHERE symbol = :symbol", price_today=price_today, symbol=symbol)
 
 
         #Lookup the stock symbol data (price, symbol, company name, percent_change)
