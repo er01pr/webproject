@@ -415,15 +415,13 @@ def sell():
         if not stock:
             return apology ("Please enter a valid stock", 403)
 
-        #Compute the total amount of the shares bought (One company stock only)
+        #Compute the total amount of the shares sold (One company stock only)
         total = stock_price * float(shares)
 
         #Update the total amount of cash in hand by adding the sold stocks.
         db.execute("UPDATE users SET cash = cash + :total WHERE id = :id", id=session["user_id"], total=total)
 
         #Check if the total quantity of shares is equal to the quantity the user is trying to sell.
-
-
         #Add the stock in the history table
         history = db.execute("INSERT INTO history (symbol, quantity, price, transacted, id) VALUES (?, ?, ?, ?, ?)", symbol, int(shares) * -1, float(stock_price), date_time, session["user_id"] )
 
@@ -431,7 +429,7 @@ def sell():
         if shares == get_quantity_int:
             db.execute("DELETE FROM portfolio WHERE id = :id AND symbol = :symbol", id=session['user_id'], symbol=symbol)
         else:
-            db.execute("UPDATE portfolio SET quantity = quantity - :shares WHERE id = :id AND symbol = :symbol", id=session["user_id"], symbol=symbol, shares=shares)
+            db.execute("UPDATE portfolio SET quantity = quantity - :shares, total = total -:total WHERE id = :id AND symbol = :symbol", id=session["user_id"], symbol=symbol, shares=shares, total=total)
 
         return redirect (url_for('index'))
 
@@ -477,13 +475,12 @@ def rankings():
         #test = db.execute("UPDATE portfolio SET price_today = :price_today", price_today=price_today)
 
         #Compute the Hold Value
-        users = db.execute ("SELECT *, history.id, COUNT(transacted) AS transactions, users.username, users.hold_value FROM history INNER JOIN users ON history.id = users.id GROUP BY history.id ORDER BY COUNT(transacted) DESC")
+        users = db.execute ("SELECT DISTINCT users.id, users.username, num_transactions, hold_value, history.id, pnl FROM users INNER JOIN (SELECT COUNT(transacted) as num_transactions, history.id FROM history GROUP by history.id ) as history ON users.id=history.id INNER JOIN (SELECT AVG(profit_loss) as pnl, portfolio.id FROM portfolio GROUP BY portfolio.id ) as portfolio ON portfolio.id=history.id GROUP by history.id")
 
         #Percent change
         #ports = db.execuute("SELECT portfolio.id, SUM(percent_change) AS sum_percent FROM portfolio GROUP BY id ORDER BY SUM(percent_change) ASC")
 
         #Get the current price of the stocks in the portfolio.
-
 
 
         return render_template("rankings.html", users=users)

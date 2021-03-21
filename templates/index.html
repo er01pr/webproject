@@ -31,7 +31,7 @@
                     <td>{{ port.sharetotal }}</td>
                     <td>{{ port.stock_price | usd }}</td>
                     <td>{{ port.avg_open | usd }}</td>
-                    <td>{{ port.profit_loss }}</td>
+                    <td>{{ port.profit_loss| round (2, 'ceil')  }}%</td>
                     <td>{{ port.total | usd }}</td>
                 </tr>
             {% endfor %}
