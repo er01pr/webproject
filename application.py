@@ -14,6 +14,8 @@ from helpers import apology, login_required, lookup, usd
 
 from datetime import datetime
 
+from numpy import mean
+
 
 
 # Configure application
@@ -56,7 +58,7 @@ def index():
 #Get the current data of the stock.
 
     #SUM all similar stock values from Portfolio.
-    ports = db.execute("SELECT *, SUM(quantity) as sharetotal FROM portfolio WHERE id = :id GROUP BY name", id=session["user_id"])
+    ports = db.execute("SELECT *, SUM(quantity) as sharetotal FROM portfolio WHERE id = :id GROUP BY symbol", id=session["user_id"])
 
     #Get the remaining cash of the user from the users table.
     get_cash = db.execute("SELECT cash FROM users WHERE id = :id", id=session['user_id'])
@@ -68,7 +70,6 @@ def index():
     get_grand_total = db.execute("SELECT *, SUM(total) as grand_total FROM portfolio where id = :id", id=session["user_id"])
     grand_total_fl = get_grand_total[0]['grand_total']
 
-    #Compute the Profit/Loss = Price Today - Bought Price / Price Today
 
 
     #Hold value is the sum of the shares * price of each shares in the portfolios PLUS the remaining cash.
@@ -79,6 +80,61 @@ def index():
     else:
         hold_value = remaining_cash
 
+
+    #Query for the symbol in the database for the specific user.
+    rows = db.execute("SELECT symbol, stock_price FROM portfolio WHERE id = :id GROUP by symbol", id=session["user_id"])
+
+    #Initiate a list for all the open prices of stocks of a certain user.
+    price_open = []
+    num_stocks = []
+    symbol_list = []
+    avg_open_list = []
+    profit_loss_list = []
+    price_today_list = []
+
+
+    for i in range(len(rows)):
+        print(rows[i]['symbol'])
+        symbol = rows[i]['symbol']
+        open_price = rows[i]['stock_price']
+        print(rows[i]['stock_price'])
+        stock = lookup(rows[i]['symbol'])
+        price_today = stock['price']
+
+        #Insert data into the price_open list
+        price_open.insert(i, open_price)
+
+        #Count the number of stocks in posession
+        share_total = ports[i]['sharetotal']
+
+        #Insert data into the num_stocks list
+        num_stocks.insert(i, share_total)
+
+        #Insert data into the symbol_list list
+        symbol_list.insert(i, symbol)
+
+        #Insert data into the price_today_list
+        price_today_list.insert(i, price_today)
+
+        #Compute for the average open price of all stocks of a certain user.
+        total_price = ports[i]['total']
+        avg_open = total_price/share_total
+        avg_open_list.insert(i, avg_open)
+
+        profit_loss = ((price_today - avg_open)/avg_open)*100
+
+        profit_loss_list.insert(i, (profit_loss))
+
+
+        db.execute("UPDATE portfolio SET price_today = :price_today, profit_loss = :profit_loss, avg_open = :avg_open WHERE symbol = :symbol AND id = :id", price_today=price_today, symbol=symbol,profit_loss=profit_loss, avg_open=avg_open, id=session["user_id"])
+
+
+    print("The symbols are:", symbol_list)
+    print("The quantity are: ", num_stocks)
+    print("The open prices are: ", price_open)
+    print("The average open prices are: ", avg_open_list)
+    print("The prices today are: ", price_today_list)
+    print("The profit and loss are: ", profit_loss_list)
 
     return render_template("index.html", ports=ports, remaining_cash = remaining_cash, hold_value=hold_value,)
 
@@ -155,13 +211,14 @@ def buy():
 
             #If the stock already exists in the portfolio. Update the quantity.
             if len(rows) == 1:
-                db.execute("UPDATE portfolio SET quantity = quantity + :quantity AND total = :total AND stock_price = :stock_price WHERE id = :id AND symbol = :symbol", id=session["user_id"], symbol=symbol, quantity=quantity, total=total, stock_price = float(stock_price))
+                db.execute("UPDATE portfolio SET quantity = quantity + :quantity,  total = total + :total, stock_price = :stock_price WHERE id = :id AND symbol = :symbol", id=session["user_id"], symbol=symbol, quantity=quantity, total=total, stock_price = float(stock_price))
             else:
                 #Insert the user, shares bought, shares price, and the quantity bought in portfolio table.
                 db.execute("INSERT INTO portfolio (quantity, total, symbol, id, stock_price, name, percent_change) VALUES (?, ?, ?, ?, ?, ?, ?)", int(quantity), total, symbol, session['user_id'], float(stock_price), stock['name'], changePercent)
 
 
-    return redirect (url_for('index'))
+    #return redirect (url_for('index'))
+    return render_template("buy.html")
 
 @app.route("/history")
 @login_required
