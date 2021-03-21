@@ -12,12 +12,14 @@
                 <th>Name</th>
                 <th>Shares</th>
                 <th>Price</th>
+                <th>Average Open</th>
+                <th>P/L</th>
                 <th>TOTAL</th>
             </tr>
         </thead>
         <tfoot>
             <tr style="text-align:left">
-                <td colspan="4"></td>
+                <td colspan="6"></td>
                 <td>{{ hold_value | usd }}</td>
             </tr>
         </tfoot>
@@ -28,13 +30,15 @@
                     <td>{{ port.name }}</td>
                     <td>{{ port.sharetotal }}</td>
                     <td>{{ port.stock_price | usd }}</td>
+                    <td>{{ port.avg_open | usd }}</td>
+                    <td>{{ port.profit_loss| round (2, 'ceil')  }}%</td>
                     <td>{{ port.total | usd }}</td>
                 </tr>
             {% endfor %}
 
             <tr>
-                <td colspan="4" style="text-align:left">CASH</td>
-                <td>{{ remaining_cash | usd }}</td>
+                <td colspan="6" style="text-align:left">CASH</td>
+                <td colspan="6" style="text-align:left">{{ remaining_cash | usd }}</td>
             </tr>
         </tbody>
     </table>
