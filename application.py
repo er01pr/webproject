@@ -438,22 +438,20 @@ def sell():
 @login_required
 def rankings():
 
-    if request.method == "GET":
+    #Create a list of options to choose from.
+    OPTIONS = ["Hold value",
+    "Transactions",
+    "PnL"
+    ]
 
-        return render_template("rankings.html")
+    if request.method == "GET":
+        return render_template("rankings.html", options=OPTIONS)
     if request.method == "POST":
 
         #Show leaderboards in terms of hold value, change in hold value, and number of transactions per day, week, month and year
 
         #Access form data
-        holdvalue = request.form.get("holdvalue")
-        percent_change = request.form.get("change")
-        transactions = request.form.get("transactions")
-
-        day = request.form.get("day")
-        week = request.form.get("week")
-        month = request.form.get("month")
-        year = request.form.get("year")
+        user_select = request.form.get("option")
 
 
         #Query for the symbol in the database.
@@ -466,24 +464,15 @@ def rankings():
             price_today = stock['price']
             db.execute("UPDATE portfolio SET price_today = :price_today WHERE symbol = :symbol", price_today=price_today, symbol=symbol)
 
+        #Query depending on the users selection.
+        if user_select == "Hold":
+            users = db.execute ("SELECT DISTINCT users.id, users.username, num_transactions, hold_value, history.id, pnl FROM users INNER JOIN (SELECT COUNT(transacted) as num_transactions, history.id FROM history GROUP by history.id ) as history ON users.id=history.id INNER JOIN (SELECT AVG(profit_loss) as pnl, portfolio.id FROM portfolio GROUP BY portfolio.id ) as portfolio ON portfolio.id=history.id GROUP by history.id ORDER BY hold_value DESC")
+        if user_select == "Transactions":
+            users = db.execute ("SELECT DISTINCT users.id, users.username, num_transactions, hold_value, history.id, pnl FROM users INNER JOIN (SELECT COUNT(transacted) as num_transactions, history.id FROM history GROUP by history.id ) as history ON users.id=history.id INNER JOIN (SELECT AVG(profit_loss) as pnl, portfolio.id FROM portfolio GROUP BY portfolio.id ) as portfolio ON portfolio.id=history.id GROUP by history.id ORDER BY num_transactions DESC")
+        if user_select == "PnL":
+            users = db.execute ("SELECT DISTINCT users.id, users.username, num_transactions, hold_value, history.id, pnl FROM users INNER JOIN (SELECT COUNT(transacted) as num_transactions, history.id FROM history GROUP by history.id ) as history ON users.id=history.id INNER JOIN (SELECT AVG(profit_loss) as pnl, portfolio.id FROM portfolio GROUP BY portfolio.id ) as portfolio ON portfolio.id=history.id GROUP by history.id ORDER BY pnl DESC")
 
-        #Lookup the stock symbol data (price, symbol, company name, percent_change)
-        #stock = lookup(symbol)
-        #price_today = stock['price']
-
-        #Update the price_today field in the porfolio table with the current price of the stock.
-        #test = db.execute("UPDATE portfolio SET price_today = :price_today", price_today=price_today)
-
-        #Compute the Hold Value
-        users = db.execute ("SELECT DISTINCT users.id, users.username, num_transactions, hold_value, history.id, pnl FROM users INNER JOIN (SELECT COUNT(transacted) as num_transactions, history.id FROM history GROUP by history.id ) as history ON users.id=history.id INNER JOIN (SELECT AVG(profit_loss) as pnl, portfolio.id FROM portfolio GROUP BY portfolio.id ) as portfolio ON portfolio.id=history.id GROUP by history.id")
-
-        #Percent change
-        #ports = db.execuute("SELECT portfolio.id, SUM(percent_change) AS sum_percent FROM portfolio GROUP BY id ORDER BY SUM(percent_change) ASC")
-
-        #Get the current price of the stocks in the portfolio.
-
-
-        return render_template("rankings.html", users=users)
+        return render_template("rankings.html", users=users, options=OPTIONS)
 
 
 def errorhandler(e):

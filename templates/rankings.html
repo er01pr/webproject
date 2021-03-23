@@ -7,20 +7,11 @@
 {% block main %}
     <form action="/rankings" method="post">
         <div class="form-group">
-        <select class="form-control" name="rankings">
+        <select class="form-control" name="option">
             <option disabled selected value=" ">View By</option>
-            <option value=holdvalue>Hold value</option>
-            <option value=change>Percent Change</option>
-            <option value=transactions>Number of transactions</option>
-        </select>
-        </div>
-        <div class="form-group">
-        <select class="form-control" name="time">
-            <option disabled selected value=" ">Time</option>
-            <option value=day>Day</option>
-            <option value=week>Week</option>
-            <option value=month>Month</option>
-            <option value=year>Year</option>
+            {% for option in options %}
+                <option value={{option}}>{{option}}</option>
+            {% endfor %}
         </select>
         </div>
 
