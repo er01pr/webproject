@@ -474,6 +474,49 @@ def rankings():
 
         return render_template("rankings.html", users=users, options=OPTIONS)
 
+@app.route("/changePassword", methods=["GET", "POST"])
+@login_required
+def changePassword():
+    """Changes the Password of the user"""
+
+    if request.method == "GET":
+
+        #Query for the current user that is logged in.
+        user = db.execute("SELECT username from users WHERE id = :id", id=session['user_id'])
+
+        return render_template("changePassword.html", user=user)
+
+    if request.method == "POST":
+
+        #Query for the current user that is logged in and get the hash.
+        new_pass = db.execute("SELECT username, hash from users WHERE id = :id", id=session['user_id'])
+
+        old_password = request.form.get("old_password")
+        password = request.form.get("password")
+        confirmation = request.form.get("confirmation")
+
+        #Check if the user entered an input
+        if not password:
+            return apology("Please enter a password", 400)
+        if not confirmation:
+            return apology("Please enter a password confirmation", 400)
+
+        #Check if the password and the confirmation password is the same.
+        if password==confirmation:
+            hashpw = generate_password_hash(password)
+
+        else:
+            return apology("Password doesn't match", 400)
+
+        #Check if the entered old password is correct.
+        if check_password_hash(new_pass[0]['hash'], old_password)==True:
+            db.execute("UPDATE users SET hash = :hashpw WHERE id = :id", hashpw=hashpw, id=session['user_id'])
+            print("The password has changed")
+        else:
+            return apology ("Hash doesn't match", 400)
+
+        return redirect ("/")
+
 
 def errorhandler(e):
     """Handle error"""
