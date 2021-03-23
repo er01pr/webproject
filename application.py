@@ -518,6 +518,27 @@ def changePassword():
         return redirect ("/")
 
 
+@app.route("/cash", methods=["GET", "POST"])
+@login_required
+def cash():
+    """Get stock quote."""
+
+    #Access the form data
+    cash = request.form.get("cash")
+
+    #Render the quote.html page
+    if request.method == "GET":
+        return render_template("cash.html")
+
+    #Lookup the stock info
+    if request.method == "POST":
+        if cash != None:
+            new_cash = db.execute("UPDATE users SET cash = cash + :cash where id = :id", cash=cash, id=session['user_id'])
+            return render_template("cash.html", new_cash=new_cash)
+        else:
+            return apology ("Invalid input", 400)
+
+
 def errorhandler(e):
     """Handle error"""
     if not isinstance(e, HTTPException):
