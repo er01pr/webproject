@@ -212,10 +212,11 @@ def buy():
             #If the stock already exists in the portfolio. Update the quantity.
             if len(rows) == 1:
                 db.execute("UPDATE portfolio SET quantity = quantity + :quantity,  total = total + :total, stock_price = :stock_price WHERE id = :id AND symbol = :symbol", id=session["user_id"], symbol=symbol, quantity=quantity, total=total, stock_price = float(stock_price))
+                flash('You successfuly bought the stock')
             else:
                 #Insert the user, shares bought, shares price, and the quantity bought in portfolio table.
                 db.execute("INSERT INTO portfolio (quantity, total, symbol, id, stock_price, name, percent_change) VALUES (?, ?, ?, ?, ?, ?, ?)", int(quantity), total, symbol, session['user_id'], float(stock_price), stock['name'], changePercent)
-
+                flash('You successfully bought the stock!')
 
     #return redirect (url_for('index'))
     return render_template("buy.html")
@@ -428,9 +429,10 @@ def sell():
         #If it's equal then delete the stock in the portfolio. #Else, Update the quantity of that stock in the portfolio.
         if shares == get_quantity_int:
             db.execute("DELETE FROM portfolio WHERE id = :id AND symbol = :symbol", id=session['user_id'], symbol=symbol)
+            flash('You successfully sold the stock!')
         else:
             db.execute("UPDATE portfolio SET quantity = quantity - :shares, total = total -:total WHERE id = :id AND symbol = :symbol", id=session["user_id"], symbol=symbol, shares=shares, total=total)
-
+            flash('You successfully sold the stock!')
         return redirect (url_for('index'))
 
 
@@ -484,6 +486,7 @@ def changePassword():
         #Query for the current user that is logged in.
         user = db.execute("SELECT username from users WHERE id = :id", id=session['user_id'])
 
+
         return render_template("changePassword.html", user=user)
 
     if request.method == "POST":
@@ -511,7 +514,7 @@ def changePassword():
         #Check if the entered old password is correct.
         if check_password_hash(new_pass[0]['hash'], old_password)==True:
             db.execute("UPDATE users SET hash = :hashpw WHERE id = :id", hashpw=hashpw, id=session['user_id'])
-            print("The password has changed")
+            flash('You successfully changed your password!')
         else:
             return apology ("Hash doesn't match", 400)
 
@@ -534,6 +537,7 @@ def cash():
     if request.method == "POST":
         if cash != None:
             new_cash = db.execute("UPDATE users SET cash = cash + :cash where id = :id", cash=cash, id=session['user_id'])
+            flash('You successfully added cash!')
             return render_template("cash.html", new_cash=new_cash)
         else:
             return apology ("Invalid input", 400)
