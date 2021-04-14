@@ -14,7 +14,6 @@ from helpers import apology, login_required, lookup, usd
 
 from datetime import datetime
 
-from numpy import mean
 
 
 
